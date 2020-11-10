@@ -4,6 +4,7 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import numpy as np
 import seaborn as sns
 
@@ -27,54 +28,43 @@ from time import strftime
 
 # Importing my acquire module:
 import acquire
+import env
+import rapid_env
 
-
+# This is to make sure matplotlib doesn't throw the following error:
+# The next line fixes "TypeError: float() argument must be a string or a number, not 'Timestamp' matplotlib"
+pd.plotting.register_matplotlib_converters()
 
 # Main prep function, which works from my acquire file to just prior to splitting the data. Does not include any visualizations:
+def prep_web_project(df):
+    '''
+    This function will prepare the dataframe for exploration. 
+    '''
+    
+    # Combining the date and time into one column
+    df['date_time'] = df['date'] + " " + df["timestamp"]
+    df['date_time'] = pd.to_datetime(df.date_time)
+    
+    # Dropping old columns:
+    df.drop(columns = ['date', 'timestamp'], inplace = True)
+    
+    # Now to set that dt as the index:
+    df = df.set_index('date_time')
+    
+    # Adding columns for future analysis and exploration:
+    
+    df['year'] = df.index.year
+    df['month'] = df.index.month
+    df['day'] = df.index.day
+    df['hour'] = df.index.hour
+    df['weekday'] = df.index.day_name()
 
-def prep_store_data():
-    '''
-    No inputs required for this function.
-    This prepare function takes the data and bridges the prepare stage steps from my acquire file to just prior to splitting the data. 
-    Does not include any visualizations.
-    '''
-    
-    #Creating the df:
-    if os.path.isfile('store_data.csv'):
-        df = pd.read_csv('store_data.csv')
-        print('Read df from .csv')
-    else:
-        df = acquire.my_get_store_data_read()
-        print("Acquired df from database.")
-    
-    # Cleaning up extra index column;
-    df.drop(columns = ['index'], inplace = True)
-    
-    # Changing the sale_date column to datetime type. Note the shrftime formatting:
-    df.sale_date = pd.to_datetime(df.sale_date, format='%a, %d %b %Y %H:%M:%S %Z')
-    print('Reformatted dates correctly')
-    
-    # I am running the sale_amount and item_price viz in a separate function.
-    
-    # Set the index to be the datetime variable:
-    df = df.set_index('sale_date').sort_index()
-    print('Set dates as index')
-    
-    # Adding a 'month' and 'day of week' columns:
-    df["month"] = df.index.month
-    df['day'] = df.index.day_name()
-        
-    # renaming columns:
-    df = df.rename(columns = {'sale_amount': 'quantity'})
-    
-    # Adding column for sales_total, which is the total order: total items * item price.
-    df['sales_total'] = (df.quantity) * (df.item_price)
-    
-    # Plotting the histograms
-    df[['quantity', 'item_price']].hist()
-    plt.show()
+    # Idetifying datascience cohorts:
+    df['is_ds'] = df.cohort_id.isin([30, 34, 55, 59])
     
     return df
+    
+
 
 # Germany ops function:
 
