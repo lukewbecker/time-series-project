@@ -47,7 +47,7 @@ Initial ideas for testing.
 
 | Feature | Definition |
 | --- | --- |
-| bathroomcnt | Number of bathrooms in property (includes half bathrooms) |
+| webpage | API endpoints accessed in the curriculum |
 | bedroomcnt | Number of bedrooms in property |
 | calculatedbathnbr | Number of both bedrooms and bathrooms in property |
 | calculatedfinishedsquarefeet | Total Square Footage of the property |
